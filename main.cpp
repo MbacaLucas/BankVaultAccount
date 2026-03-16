@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <iomanip>
 
 class BankAccount
 {
@@ -28,7 +29,7 @@ public:
 
     void showInfo() const
     {
-        std::cout << "Owner: " << owner << "| Balance: $" << balance << '\n';
+        std::cout << "Owner: " << owner << "| Balance: $" << std::fixed << std::setprecision(0) << balance << '\n';
     }
 
     bool withrawMoney(double amount, int enteredPin)
@@ -45,7 +46,7 @@ public:
         }
 
         balance -= amount;
-        std::cout << "Processing... Withdrawal of $" << amount << " successful!\n";
+        std::cout << "Processing... Withdrawal of $" << std::fixed << std::setprecision(0) << amount << " successful!\n";
         return true;
     }
 
@@ -64,7 +65,7 @@ public:
 
 int main()
 {
-    std::vector<BankAccount> account{};
+    std::vector<BankAccount> accounts{};
     std::string temporalName;
     double temporalDesposit{};
     int temporalPin{};
@@ -80,6 +81,9 @@ int main()
 
     std::cout << "Set your PIN (numbers only): ";
     std::cin >> temporalPin;
+
+    accounts.push_back(BankAccount(temporalName, temporalDesposit, temporalPin));
+    std::cout << "\nAccount created successfully!\n";
 
     return 0;
 }
