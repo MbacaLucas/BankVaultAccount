@@ -3,22 +3,26 @@
 #include <vector>
 #include <iomanip>
 
-// Digital Bank Vault - Object Oriented Implementation
+/**
+ * BASE CLASS: BankAccount
+ * Represents the fundamental blueprint for any bank account.
+ * Focuses on Encapsulation: hiding sensitive data (balance, pin).
+ */
 class BankAccount
 {
-protected:
-    // Private attributes: These are protected by encapsulation
+protected: // Accessible by this class and its children (SavingAccount)
     std::string owner;
     double balance;
     int pin;
 
 public:
-    // Constructor: Initializes the object and validates initial business rules
+    // CONSTRUCTOR: Initializes the "capsule" with starting data
     BankAccount(std::string name, double initialDeposit, int initialPin)
     {
         owner = name;
         pin = initialPin;
 
+        // Data Validation: Ensuring the object starts in a valid state
         if (initialDeposit >= 0)
         {
             balance = initialDeposit;
@@ -26,140 +30,162 @@ public:
         else
         {
             balance = 0;
-            std::cout << "Warning: Initial deposit cannot be negative. Setting balance to 0.";
+            std::cout << "Warning: Initial deposit cannot be negative. Setting balance to 0.\n";
         }
     }
 
-    // Displays account summary - Marked as 'const' because it doesn't modify data
+    // PUBLIC INTERFACE: Methods allowed to interact with the private data
     void showInfo() const
     {
         std::cout << "Owner: " << owner << " | Balance: $" << std::fixed << std::setprecision(0) << balance << '\n';
     }
 
-    // Secured withdrawal method - Validates both identity (PIN) and funds
     bool withrawMoney(double amount, int enteredPin)
     {
+        // Security Check
         if (enteredPin != pin)
         {
-            std::cout << "Pin invalid try again...";
+            std::cout << "Pin invalid. Try again...\n";
             return false;
         }
+        // Business Rule Check
         if (amount > balance)
         {
-            std::cout << "The amount is higher than your current balance.\n";
+            std::cout << "Insufficient funds.\n";
             return false;
         }
 
-        balance -= amount;
-        std::cout << "Processing... Withdrawal of $" << std::fixed << std::setprecision(0) << amount << " successful!\n";
+        balance -= amount; // Modifying protected data safely
+        std::cout << "Withdrawal of $" << amount << " successful!\n";
         return true;
     }
 
-    // Deposit method - Ensures only positive transactions are allowed
     bool depositAmount(double amount)
     {
         if (amount <= 0)
         {
-            std::cout << "ERROR: Deposit amount must be positive\n";
-            return false; // Stop execution if amount is invalid
+            std::cout << "ERROR: Deposit amount must be positive.\n";
+            return false;
         }
-
         balance += amount;
-        std::cout << "Deposit successful!";
+        std::cout << "Deposit successful!\n";
         return true;
     }
 };
 
+/**
+ * DERIVED CLASS: SavingAccount
+ * Inherits all logic from BankAccount but adds a specific "Interest" feature.
+ * Example of Inheritance (Is-A relationship).
+ */
 class SavingAccount : public BankAccount
 {
 private:
-    double interestRate;
+    double interestRate; // Specific to savings only
 
 public:
     SavingAccount(std::string name, double deposit, int pin, double rate)
-        : BankAccount(name, deposit, pin)
+        : BankAccount(name, deposit, pin) // Passing data to the Parent constructor
     {
         interestRate = rate;
     }
 
+    // NEW SPECIALIZED BEHAVIOR
     void applyInterest()
     {
-        double interest{balance * (interestRate / 100)};
+        double interest = balance * (interestRate / 100);
         balance += interest;
-        std::cout << "Interest applied: $" << interest << "success!n\n";
+        std::cout << "Interest applied: $" << interest << " successfully!\n";
     }
 };
 
 int main()
 {
-    // Container to store our account objects
+    // Vectors to manage our created objects
     std::vector<BankAccount> accounts{};
     std::vector<SavingAccount> savingAccounts{};
 
-    // Temporal variables for data input/handling
+    // Temporary variables for user input
     std::string temporalName;
+    int accountType{};
     double temporalAmount{};
-    int temporalPin{};
+    int temporalPin{}, confirmPin{};
     bool keepRunning{true};
+    bool isSavingMode{false};
 
-    std::cout << "|----- Creating Account -----|\n";
+    std::cout << "|----- BANK SYSTEM INITIALIZATION -----|\n";
+    std::cout << "1. Standard Account | 2. Savings Account: ";
+    std::cin >> accountType;
 
-    std::cout << "Enter your Full Name: ";
+    std::cout << "Enter Full Name: ";
     std::getline(std::cin >> std::ws, temporalName);
 
     std::cout << "Initial Deposit: ";
     std::cin >> temporalAmount;
 
-    std::cout << "Set your PIN (numbers only): ";
+    std::cout << "Set 4-digit PIN: ";
     std::cin >> temporalPin;
 
-    // Instantiate the object and move it into the vector
-    accounts.push_back(BankAccount(temporalName, temporalAmount, temporalPin));
-    std::cout << "\nAccount created successfully!\n\n";
+    // OBJECT INSTANTIATION
+    if (accountType == 2)
+    {
+        savingAccounts.push_back(SavingAccount(temporalName, temporalAmount, temporalPin, 2.5));
+        isSavingMode = true;
+    }
+    else
+    {
+        accounts.push_back(BankAccount(temporalName, temporalAmount, temporalPin));
+        isSavingMode = false;
+    }
 
-    // Main interaction loop
+    // INTERACTION LOOP
     while (keepRunning)
     {
-        int optionChoise{};
-        int confirmPin{};
+        int choice{};
+        std::cout << "\n--- Current Status ---\n";
+        if (isSavingMode)
+            savingAccounts[0].showInfo();
+        else
+            accounts[0].showInfo();
 
-        accounts[0].showInfo();
-        std::cout << "\n|---------------- BANK OPTIONS ---------------|\n\n";
-        std::cout
-            << " 1. Deposit Money |"
-            << " 2. Withdraw Money |"
-            << " 3. Exit |\n\n"
-            << "Choice: ";
+        std::cout << "\nOptions: 1.Deposit | 2.Withdraw | 3.Exit";
+        if (isSavingMode)
+            std::cout << " | 4.Apply Interest";
+        std::cout << "\nChoice: ";
+        std::cin >> choice;
 
-        std::cin >> optionChoise;
-
-        switch (optionChoise)
+        switch (choice)
         {
         case 1:
-            std::cout << "How much do you want to deposit? ";
+            std::cout << "Amount: ";
             std::cin >> temporalAmount;
-            accounts[0].depositAmount(temporalAmount);
+            if (isSavingMode)
+                savingAccounts[0].depositAmount(temporalAmount);
+            else
+                accounts[0].depositAmount(temporalAmount);
             break;
-
         case 2:
-            std::cout << "How much do you want to withdraw? ";
+            std::cout << "Amount: ";
             std::cin >> temporalAmount;
-            std::cout << "Please enter your PIN to authorize: ";
+            std::cout << "PIN: ";
             std::cin >> confirmPin;
-
-            // Critical fix: passing confirmPin to validate the transaction
-            accounts[0].withrawMoney(temporalAmount, confirmPin);
+            if (isSavingMode)
+                savingAccounts[0].withrawMoney(temporalAmount, confirmPin);
+            else
+                accounts[0].withrawMoney(temporalAmount, confirmPin);
             break;
-
         case 3:
             keepRunning = false;
             break;
-
+        case 4:
+            if (isSavingMode)
+                savingAccounts[0].applyInterest();
+            else
+                std::cout << "Not a Savings Account.\n";
+            break;
         default:
-            std::cout << "Invalid option.\n";
+            std::cout << "Invalid Option.\n";
         }
     }
-
-    std::cout << "See you soon...";
     return 0;
 }
