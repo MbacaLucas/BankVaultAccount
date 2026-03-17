@@ -13,7 +13,7 @@ Este proyecto es un Sistema Bancario por consola diseñado para practicar y domi
 - **Input Validation:** Ensures the system only accepts positive deposits and authorized withdrawals.
 - **Dynamic Menu:** Interactive interface to manage accounts in real-time.
 
-### 🇪🇸 Español
+### 🇨🇱 Español
 - **Encapsulamiento:** Protege datos sensibles como el saldo (`balance`) y el `pin` usando modificadores de acceso `protected` y `private`.
 - **Herencia:** Implementa una clase `SavingAccount` que hereda toda la lógica de una clase base `BankAccount`.
 - **Validación de Datos:** Asegura que el sistema solo acepte depósitos positivos y retiros autorizados mediante PIN.
