@@ -6,7 +6,7 @@
 // Digital Bank Vault - Object Oriented Implementation
 class BankAccount
 {
-private:
+protected:
     // Private attributes: These are protected by encapsulation
     std::string owner;
     double balance;
@@ -70,10 +70,31 @@ public:
     }
 };
 
+class SavingAccount : public BankAccount
+{
+private:
+    double interestRate;
+
+public:
+    SavingAccount(std::string name, double deposit, int pin, double rate)
+        : BankAccount(name, deposit, pin)
+    {
+        interestRate = rate;
+    }
+
+    void applyInterest()
+    {
+        double interest{balance * (interestRate / 100)};
+        balance += interest;
+        std::cout << "Interest applied: $" << interest << "success!n\n";
+    }
+};
+
 int main()
 {
     // Container to store our account objects
     std::vector<BankAccount> accounts{};
+    std::vector<SavingAccount> savingAccounts{};
 
     // Temporal variables for data input/handling
     std::string temporalName;
